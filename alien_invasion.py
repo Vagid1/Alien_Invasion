@@ -3,6 +3,7 @@ import sys
 import pygame
 
 from ship import  Ship
+from bullet import Bullet
 
 from settings import  Settings
 
@@ -22,13 +23,20 @@ class AlienInvasion:
 
         self.bg_color = (230, 230, 230)
         self.ship = Ship(self)
+        self.bullets = pygame.sprite.Group()
 
     def run_game(self):
         """Запуск основного цикла игры."""
         while True:
             self._check_events()
             self.ship.update()
+            self.bullets.update()
             self._update_screen()
+
+            # Удаление снарядов, вышедших за край экрана.
+            for bullet in self.bullets.copy():
+                if bullet.rect.bottom <= 0:
+                    self.bullets.remove(bullet)
     def _check_events(self):
         # Отслеживание событий клавиатуры и мыши.
         for event in pygame.event.get():
@@ -52,6 +60,8 @@ class AlienInvasion:
             self.ship.moving_down = True
         elif event.key == pygame.K_ESCAPE:
             sys.exit()
+        elif event.key == pygame.K_SPACE:
+            self._fire_bullet()
 
     def _check_keyup_events(self, event):
         """Реагирует на отпуускание клавиш."""
@@ -64,10 +74,18 @@ class AlienInvasion:
         elif event.key == pygame.K_DOWN:
             self.ship.moving_down = False
 
+    def _fire_bullet(self):
+        """Создание нового снаряда и включение его в группу bullets."""
+        if len(self.bullets) < self.settings.bullets_allowed:
+            new_bullet = Bullet(self)
+            self.bullets.add(new_bullet)
+
     def _update_screen(self):
             #При каждом проходе цикла перерисовывается экран.
                 self.screen.fill(self.settings.bg_color)
                 self.ship.blitme()
+                for bullet in self.bullets.sprites():
+                    bullet.draw_bullet()
             # Отображение последнего прорисованного экрана.
                 pygame.display.flip()
 
