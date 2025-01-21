@@ -17,3 +17,4 @@ class Settings():
         # Настройки корабля.
         self.ship_speed = 0.9
         self.ship_speeds = 0.9
+
